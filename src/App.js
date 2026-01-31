@@ -165,6 +165,8 @@ function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const { addToCart } = useCart();
+  const [added, setAdded] = useState(false);
+  const [size, setSize] = useState("");
 
   useEffect(() => {
     fetch(`https://fakestoreapi.com/products/${id}`)
@@ -174,17 +176,49 @@ function ProductDetails() {
 
   if (!product) return <h3>Loading...</h3>;
 
+  const isClothing = product.category.includes("clothing");
+
+  const handleAdd = () => {
+    if (isClothing && !size) {
+      alert("Please select a size");
+      return;
+    }
+
+    addToCart({ ...product, size });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
+
   return (
     <div className="container">
       <img src={product.image} alt={product.title} className="detail-img" />
       <h2>{product.title}</h2>
       <p>{product.description}</p>
       <h3>₹ {getCustomPrice(product).toFixed(0)}</h3>
-      <button onClick={() => addToCart(product)}>Add to Cart</button>
+
+      {isClothing && (
+        <select
+          className="size-select"
+          value={size}
+          onChange={(e) => setSize(e.target.value)}
+        >
+          <option value="">Select Size</option>
+          <option value="S">Small (S)</option>
+          <option value="M">Medium (M)</option>
+          <option value="L">Large (L)</option>
+          <option value="XL">Extra Large (XL)</option>
+        </select>
+      )}
+
+      <button
+        className={added ? "added-btn" : ""}
+        onClick={handleAdd}
+      >
+        {added ? "Added ✓" : "Add to Cart"}
+      </button>
     </div>
   );
 }
-
 /* ================= CART ================= */
 
 function Cart() {
